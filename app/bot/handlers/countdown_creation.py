@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -43,18 +43,62 @@ async def process_emoji(message: Message, state: FSMContext):
     data = await state.get_data()
     title = data.get("title")
 
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="➡️ Завтра", callback_data="date:tomorrow")],
+        [InlineKeyboardButton(text="📅 Через неделю", callback_data="date:week")],
+        [InlineKeyboardButton(text="📆 Через месяц", callback_data="date:month")],
+    ])
+
     await message.answer(
         f"📅 **{title}** {emoji}\n\n"
-        "Введите дату (формат: ДД.МММ.ГГГГ)\n"
-        "Например: 16.05.2026",
+        "Выберите дату или введите вручную\n\n"
+        "Формат для ввода: **ДД.МММ.ГГГГ**\n"
+        "Пример: **16.05.2026**",
+        reply_markup=keyboard,
         parse_mode="Markdown"
     )
+
+
+@router.callback_query(F.data.startswith("date:"), CountdownStates.date)
+async def process_quick_date(callback: CallbackQuery, state: FSMContext):
+    date_type = callback.data.split(":")[1]
+    today = date.today()
+
+    if date_type == "tomorrow":
+        target_date = today + timedelta(days=1)
+    elif date_type == "week":
+        target_date = today + timedelta(days=7)
+    elif date_type == "month":
+        target_date = today + timedelta(days=30)
+    else:
+        return
+
+    await state.update_data(date=target_date)
+    await state.set_state(CountdownStates.repeat)
+
+    data = await state.get_data()
+    title = data.get("title")
+    emoji = data.get("emoji")
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Без повтора", callback_data=f"repeat:{REPEAT_TYPE_NONE}")],
+        [InlineKeyboardButton(text="🔁 Каждый год", callback_data=f"repeat:{REPEAT_TYPE_YEARLY}")],
+    ])
+
+    await callback.message.edit_text(
+        f"📅 **{title}** {emoji}\n"
+        f"Дата: **{target_date.strftime('%d.%m.%Y')}**\n\n"
+        "Повторение:",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
+    )
+    await callback.answer()
 
 
 @router.message(CountdownStates.date)
 async def process_date(message: Message, state: FSMContext):
     if not message.text:
-        await message.answer("❌ Введите дату")
+        await message.answer("❌ Введите дату или выберите быстрый вариант")
         return
 
     try:
@@ -63,9 +107,8 @@ async def process_date(message: Message, state: FSMContext):
         await message.answer("❌ Неверный формат. Используйте: ДД.МММ.ГГГГ\nНапример: 16.05.2026")
         return
 
-    from datetime import date
     today = date.today()
-    if target_date < today:
+    if target_date <= today:
         await message.answer("❌ Дата должна быть в будущем")
         return
 

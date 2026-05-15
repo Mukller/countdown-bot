@@ -14,7 +14,14 @@
       "Bash(python -m py_compile app/bot/handlers/countdown_creation.py)",
       "Bash(python3 -m py_compile /c/Users/Ecat/.claude/worktrees/angry-faraday-4eb262/app/bot/handlers/countdown_creation.py)",
       "Bash(git commit -m ' *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(ls -la \"C:/Program Files/Docker\" 2>/dev/null || echo \"Docker not found in Program Files\")",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker.exe\" ps -a)",
+      "Bash(export PATH=\"C:/Program Files/Docker/Docker/resources/bin:$PATH\")",
+      "Bash(\"C:/Program Files/Docker/Docker/resources/bin/docker-compose.exe\" up --build)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\Docker\\\\Docker\\\\resources\\\\bin;$env:PATH\"; docker ps -q | ForEach-Object { docker stop $_ }; echo \"Stopped containers, waiting 5 seconds...\"; Start-Sleep -Seconds 5)",
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(powershell -Command \"& 'C:\\\\Program Files\\\\Docker\\\\Docker\\\\resources\\\\bin\\\\docker.exe' logs angry-faraday-4eb262-bot-1 2>&1\")"
     ]
   }
 }
