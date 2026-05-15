@@ -22,18 +22,4 @@ def setup_scheduler(bot: Bot) -> AsyncIOScheduler:
         replace_existing=True
     )
 
-    scheduler.add_listener(
-        lambda event: logger.info("scheduler_job_executed", job_id=event.job_id),
-        mask='job_executed'
-    )
-
-    scheduler.add_listener(
-        lambda event: logger.error(
-            "scheduler_job_error",
-            job_id=event.job_id,
-            exception=str(event.exception)
-        ),
-        mask='job_error'
-    )
-
     return scheduler

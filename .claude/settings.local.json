@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m 'Add .env.example template and update Phase completion status *)",
+      "PowerShell(docker compose down)",
+      "PowerShell(docker compose up --build)",
+      "Bash(Get-ChildItem -Path \".\" -Recurse -Filter \"countdown_creation.py\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(docker compose *)",
+      "Bash(xargs grep -l \"async_session\\\\|sessionmaker\")",
+      "Bash(Get-ChildItem -Filter \"docker*\" -Recurse)",
+      "Bash(Select-Object -First 20)",
+      "Bash(python -m py_compile app/bot/handlers/countdown_creation.py)",
+      "Bash(python3 -m py_compile /c/Users/Ecat/.claude/worktrees/angry-faraday-4eb262/app/bot/handlers/countdown_creation.py)",
+      "Bash(git commit -m ' *)"
+    ]
+  }
+}
