@@ -36,7 +36,37 @@ async def view_countdown(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data.startswith("delete_countdown:"))
-async def delete_countdown(callback: CallbackQuery, session: AsyncSession):
+async def confirm_delete_countdown(callback: CallbackQuery, session: AsyncSession):
+    countdown_id = int(callback.data.split(":")[1])
+
+    countdown_repo = CountdownRepository(session)
+    countdown = await countdown_repo.get_by_id(countdown_id)
+
+    if not countdown:
+        await callback.answer("❌ Таймер не найден", show_alert=True)
+        return
+
+    countdown_service = CountdownService(countdown_repo)
+    card = countdown_service.format_countdown(countdown)
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"confirm_delete:{countdown_id}"),
+                InlineKeyboardButton(text="❌ Отмена", callback_data=f"cancel_delete:{countdown_id}"),
+            ]
+        ]
+    )
+
+    await callback.message.edit_text(
+        f"⚠️ Вы уверены, что хотите удалить этот таймер?\n\n{card}",
+        reply_markup=keyboard
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("confirm_delete:"))
+async def delete_countdown_confirmed(callback: CallbackQuery, session: AsyncSession):
     countdown_id = int(callback.data.split(":")[1])
 
     countdown_repo = CountdownRepository(session)
@@ -45,12 +75,38 @@ async def delete_countdown(callback: CallbackQuery, session: AsyncSession):
     if success:
         logger.info("countdown_deleted", user_id=callback.from_user.id, countdown_id=countdown_id)
         await callback.answer("✅ Таймер удален")
-        await callback.message.edit_text("✅ Таймер успешно удален")
-        # Go back to list
-        await callback.message.edit_text(
-            "📋 Ваши таймеры:\n\n"
-            "Перезагружаю список...",
-            reply_markup=None
+
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text="🔙 Вернуться в меню", callback_data="start")],
+            ]
         )
+
+        await callback.message.edit_text("✅ Таймер успешно удален", reply_markup=keyboard)
     else:
         await callback.answer("❌ Не удалось удалить таймер", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("cancel_delete:"))
+async def cancel_delete_countdown(callback: CallbackQuery, session: AsyncSession):
+    countdown_id = int(callback.data.split(":")[1])
+
+    countdown_repo = CountdownRepository(session)
+    countdown = await countdown_repo.get_by_id(countdown_id)
+
+    if not countdown:
+        await callback.answer("❌ Таймер не найден", show_alert=True)
+        return
+
+    countdown_service = CountdownService(countdown_repo)
+    card = countdown_service.format_countdown(countdown)
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown_id}")],
+            [InlineKeyboardButton(text="🔙 Назад", callback_data="list_countdowns")],
+        ]
+    )
+
+    await callback.message.edit_text(card, reply_markup=keyboard)
+    await callback.answer()

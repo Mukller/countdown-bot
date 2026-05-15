@@ -1,15 +1,17 @@
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
-    bot_token: str = Field(..., alias="BOT_TOKEN")
-    database_url: str = Field(..., alias="DATABASE_URL")
-    log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    model_config = ConfigDict(
+        env_file=".env",
+        extra="ignore",
+        case_sensitive=False
+    )
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    bot_token: str
+    database_url: str
+    log_level: str = "INFO"
 
 
 settings = Settings()
