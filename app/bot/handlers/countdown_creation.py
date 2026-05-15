@@ -1,10 +1,10 @@
-from datetime import date, timedelta
+from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import UserRepository, CountdownRepository
-from app.services import CountdownService, UserService, CalendarService
+from app.services import CountdownService, UserService
 from app.bot.states import CountdownStates
 from app.core.constants import MAX_TITLE_LENGTH, REPEAT_TYPE_NONE, REPEAT_TYPE_YEARLY
 from app.core.logger import get_logger
@@ -43,131 +43,33 @@ async def process_emoji(message: Message, state: FSMContext):
     data = await state.get_data()
     title = data.get("title")
 
-    today = date.today()
-    buttons = []
-
-    for i in range(1, 8):
-        d = today + timedelta(days=i)
-        buttons.append([InlineKeyboardButton(
-            text=f"+{i} день" if i == 1 else f"+{i} дней",
-            callback_data=f"quickdate:{d.year}:{d.month}:{d.day}"
-        )])
-
-    buttons.append([InlineKeyboardButton(text="📅 Выбрать другую дату", callback_data="custom_date")])
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
-
     await message.answer(
-        f"📅 **{title}** {emoji}\n\nВыберите дату:",
-        reply_markup=keyboard,
+        f"📅 **{title}** {emoji}\n\n"
+        "Введите дату (формат: ДД.МММ.ГГГГ)\n"
+        "Например: 16.05.2026",
         parse_mode="Markdown"
     )
 
 
-@router.callback_query(F.data.startswith("quickdate:"), CountdownStates.date)
-async def process_quickdate(callback: CallbackQuery, state: FSMContext):
-    parts = callback.data.split(":")
-    year = int(parts[1])
-    month = int(parts[2])
-    day = int(parts[3])
-
-    selected_date = date(year, month, day)
-    await state.update_data(date=selected_date)
-    await state.set_state(CountdownStates.repeat)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Без повтора", callback_data=f"repeat:{REPEAT_TYPE_NONE}")],
-        [InlineKeyboardButton(text="🔁 Каждый год", callback_data=f"repeat:{REPEAT_TYPE_YEARLY}")],
-    ])
-
-    await callback.message.edit_text(
-        f"📅 **{title}** {emoji}\n"
-        f"Дата: **{selected_date.strftime('%d.%m.%Y')}**\n\n"
-        "Повторение:",
-        reply_markup=keyboard,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data == "custom_date", CountdownStates.date)
-async def custom_date(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(CountdownStates.year)
-
-    year_selector = CalendarService.get_year_selector(date.today().year)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    await callback.message.edit_text(
-        f"📅 **{title}** {emoji}\n\nВыберите год:",
-        reply_markup=year_selector,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("yearchosen:"), CountdownStates.year)
-async def process_year(callback: CallbackQuery, state: FSMContext):
-    year = int(callback.data.split(":")[1])
-    await state.update_data(year=year)
-    await state.set_state(CountdownStates.month)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    month_selector = CalendarService.get_month_selector(year)
-    await callback.message.edit_text(
-        f"📅 **{title}** {emoji}\n\nВыберите месяц:",
-        reply_markup=month_selector,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("monthchosen:"), CountdownStates.month)
-async def process_month(callback: CallbackQuery, state: FSMContext):
-    parts = callback.data.split(":")
-    year = int(parts[1])
-    month = int(parts[2])
-
-    await state.update_data(month=month)
-    await state.set_state(CountdownStates.date)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    calendar = CalendarService.get_calendar(year, month, date.today())
-    await callback.message.edit_text(
-        f"📅 **{title}** {emoji}\n\nВыберите дату:",
-        reply_markup=calendar,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("calday:"), CountdownStates.date)
-async def process_date(callback: CallbackQuery, state: FSMContext):
-    parts = callback.data.split(":")
-    year = int(parts[1])
-    month = int(parts[2])
-    day = int(parts[3])
-
-    selected_date = date(year, month, day)
-    today = date.today()
-
-    if selected_date < today:
-        await callback.answer("❌ Прошлая дата", show_alert=True)
+@router.message(CountdownStates.date)
+async def process_date(message: Message, state: FSMContext):
+    if not message.text:
+        await message.answer("❌ Введите дату")
         return
 
-    await state.update_data(date=selected_date)
+    try:
+        target_date = datetime.strptime(message.text.strip(), "%d.%m.%Y").date()
+    except ValueError:
+        await message.answer("❌ Неверный формат. Используйте: ДД.МММ.ГГГГ\nНапример: 16.05.2026")
+        return
+
+    from datetime import date
+    today = date.today()
+    if target_date < today:
+        await message.answer("❌ Дата должна быть в будущем")
+        return
+
+    await state.update_data(date=target_date)
     await state.set_state(CountdownStates.repeat)
 
     data = await state.get_data()
@@ -179,14 +81,13 @@ async def process_date(callback: CallbackQuery, state: FSMContext):
         [InlineKeyboardButton(text="🔁 Каждый год", callback_data=f"repeat:{REPEAT_TYPE_YEARLY}")],
     ])
 
-    await callback.message.edit_text(
+    await message.answer(
         f"📅 **{title}** {emoji}\n"
-        f"Дата: **{selected_date.strftime('%d.%m.%Y')}**\n\n"
+        f"Дата: **{target_date.strftime('%d.%m.%Y')}**\n\n"
         "Повторение:",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )
-    await callback.answer()
 
 
 @router.callback_query(F.data.startswith("repeat:"), CountdownStates.repeat)
@@ -226,38 +127,6 @@ async def process_repeat(callback: CallbackQuery, state: FSMContext, session: As
 
     await state.clear()
     logger.info("countdown_created", user_id=user.id, countdown_id=countdown.id)
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("cal:"), CountdownStates.date)
-async def navigate_calendar(callback: CallbackQuery, state: FSMContext):
-    parts = callback.data.split(":")
-    month = int(parts[1])
-    year = int(parts[2]) if len(parts) > 2 else date.today().year
-
-    if month < 1:
-        month = 12
-        year -= 1
-    elif month > 12:
-        month = 1
-        year += 1
-
-    calendar = CalendarService.get_calendar(year, month, date.today())
-    await callback.message.edit_text(
-        "📅 Выберите дату:",
-        reply_markup=calendar
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("yearchg:"), CountdownStates.year)
-async def change_year_decade(callback: CallbackQuery, state: FSMContext):
-    year = int(callback.data.split(":")[1])
-    year_selector = CalendarService.get_year_selector(year)
-    await callback.message.edit_text(
-        "📅 Выберите год:",
-        reply_markup=year_selector
-    )
     await callback.answer()
 
 
