@@ -31,6 +31,7 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     # Register middlewares
+    print("Registering middlewares...", flush=True)
     dp.message.middleware(DBSessionMiddleware())
     dp.callback_query.middleware(DBSessionMiddleware())
 
@@ -42,6 +43,7 @@ async def main():
     dp.include_router(handlers.settings.router)
 
     # Startup and shutdown
+    print("Running startup...", flush=True)
     await on_startup(bot)
 
     # Setup scheduler
