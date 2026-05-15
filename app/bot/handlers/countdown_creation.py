@@ -48,8 +48,7 @@ async def process_emoji(message: Message, state: FSMContext):
     year_selector = CalendarService.get_year_selector(today.year)
 
     await message.answer(
-        f"📅 Выберите год события:\n\n"
-        f"**{title}** {emoji}",
+        f"📅 **{title}** {emoji}\n\nВыберите год:",
         reply_markup=year_selector,
         parse_mode="Markdown"
     )
@@ -69,45 +68,8 @@ async def process_year(callback: CallbackQuery, state: FSMContext):
     month_selector = CalendarService.get_month_selector(year)
 
     await callback.message.edit_text(
-        f"📅 Выберите месяц:\n\n"
-        f"**{title}** {emoji}",
+        f"📅 **{title}** {emoji}\n\nВыберите месяц:",
         reply_markup=month_selector,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data == "calback", CountdownStates.year)
-async def back_from_year(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    today = date.today()
-    year_selector = CalendarService.get_year_selector(today.year)
-
-    await callback.message.edit_text(
-        f"📅 Выберите год события:\n\n"
-        f"**{title}** {emoji}",
-        reply_markup=year_selector,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data == "calback", CountdownStates.month)
-async def back_from_month(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-    year = data.get("year")
-
-    year_selector = CalendarService.get_year_selector(year)
-
-    await callback.message.edit_text(
-        f"📅 Выберите год события:\n\n"
-        f"**{title}** {emoji}",
-        reply_markup=year_selector,
         parse_mode="Markdown"
     )
     await callback.answer()
@@ -130,8 +92,7 @@ async def process_month(callback: CallbackQuery, state: FSMContext):
     calendar = CalendarService.get_calendar(year, month, today)
 
     await callback.message.edit_text(
-        f"📅 Выберите дату события:\n\n"
-        f"**{title}** {emoji}",
+        f"📅 **{title}** {emoji}\n\nВыберите дату:",
         reply_markup=calendar,
         parse_mode="Markdown"
     )
@@ -152,36 +113,6 @@ async def process_date(callback: CallbackQuery, state: FSMContext):
         await callback.answer("❌ Нельзя выбрать прошлую дату", show_alert=True)
         return
 
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text="✅ Подтвердить", callback_data=f"confirm_date:{year}:{month}:{day}")],
-            [InlineKeyboardButton(text="🔙 Выбрать другую дату", callback_data="back_to_calendar_from_date")],
-        ]
-    )
-
-    await callback.message.edit_text(
-        f"⏳ Подтвердите дату события:\n\n"
-        f"**{selected_date.strftime('%d.%m.%Y')}**\n\n"
-        f"**{title}** {emoji}",
-        reply_markup=keyboard,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("confirm_date:"), CountdownStates.date)
-async def confirm_date(callback: CallbackQuery, state: FSMContext):
-    parts = callback.data.split(":")
-    year = int(parts[1])
-    month = int(parts[2])
-    day = int(parts[3])
-
-    selected_date = date(year, month, day)
-
     await state.update_data(date=selected_date)
     await state.set_state(CountdownStates.repeat)
 
@@ -197,27 +128,11 @@ async def confirm_date(callback: CallbackQuery, state: FSMContext):
     )
 
     await callback.message.edit_text(
-        f"✨ Дата подтверждена: **{selected_date.strftime('%d.%m.%Y')}**\n\n"
-        f"**{title}** {emoji}\n\n"
-        "Выберите тип повторения:",
+        f"📅 **{title}** {emoji}\n"
+        f"Дата: **{selected_date.strftime('%d.%m.%Y')}**\n\n"
+        "Повторение:",
         reply_markup=keyboard,
         parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data == "back_to_calendar_from_date", CountdownStates.date)
-async def back_to_calendar_from_date(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    year = data.get("year")
-    month = data.get("month")
-
-    today = date.today()
-    calendar = CalendarService.get_calendar(year, month, today)
-
-    await callback.message.edit_text(
-        "📅 Выберите дату события:",
-        reply_markup=calendar
     )
     await callback.answer()
 
@@ -231,12 +146,10 @@ async def process_repeat(callback: CallbackQuery, state: FSMContext, session: As
     emoji = data.get("emoji")
     target_date = data.get("date")
 
-    # Ensure user exists
     user_repo = UserRepository(session)
     user_service = UserService(user_repo)
     user = await user_service.get_or_create_user(callback.from_user.id)
 
-    # Save countdown
     countdown_repo = CountdownRepository(session)
     countdown_service = CountdownService(countdown_repo)
 
@@ -272,7 +185,6 @@ async def navigate_calendar(callback: CallbackQuery, state: FSMContext):
     month = int(parts[1])
     year = int(parts[2]) if len(parts) > 2 else date.today().year
 
-    # Handle month/year boundaries
     if month < 1:
         month = 12
         year -= 1
@@ -284,12 +196,10 @@ async def navigate_calendar(callback: CallbackQuery, state: FSMContext):
     calendar = CalendarService.get_calendar(year, month, today)
 
     await callback.message.edit_text(
-        "📅 Выберите дату события:",
+        "📅 Выберите дату:",
         reply_markup=calendar
     )
     await callback.answer()
-
-
 
 
 @router.callback_query(F.data.startswith("yearchg:"), CountdownStates.year)
@@ -304,59 +214,7 @@ async def change_year_decade(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("yearpick:"), CountdownStates.date)
-async def pick_year_from_calendar(callback: CallbackQuery, state: FSMContext):
-    year = int(callback.data.split(":")[1])
-    year_selector = CalendarService.get_year_selector(year)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    await state.set_state(CountdownStates.year)
-
-    await callback.message.edit_text(
-        f"📅 Выберите год события:\n\n"
-        f"**{title}** {emoji}",
-        reply_markup=year_selector,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("monthpick:"), CountdownStates.date)
-async def pick_month_from_calendar(callback: CallbackQuery, state: FSMContext):
-    year = int(callback.data.split(":")[1])
-    month_selector = CalendarService.get_month_selector(year)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    await state.set_state(CountdownStates.month)
-    await state.update_data(year=year)
-
-    await callback.message.edit_text(
-        f"📅 Выберите месяц:\n\n"
-        f"**{title}** {emoji}",
-        reply_markup=month_selector,
-        parse_mode="Markdown"
-    )
-    await callback.answer()
-
-
-@router.callback_query(F.data == "calback")
-async def back_to_calendar(callback: CallbackQuery, state: FSMContext):
-    today = date.today()
-    calendar = CalendarService.get_calendar(today.year, today.month, today)
-
-    await callback.message.edit_text(
-        "📅 Выберите дату события:",
-        reply_markup=calendar
-    )
-    await callback.answer()
-
-
 @router.callback_query(F.data == "noop")
 async def noop_callback(callback: CallbackQuery):
     await callback.answer()
+
