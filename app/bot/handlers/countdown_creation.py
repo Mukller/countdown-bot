@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
@@ -38,17 +38,78 @@ async def process_emoji(message: Message, state: FSMContext):
         return
 
     await state.update_data(emoji=emoji)
-    await state.set_state(CountdownStates.year)
+    await state.set_state(CountdownStates.date)
 
     data = await state.get_data()
     title = data.get("title")
 
-    year_selector = CalendarService.get_year_selector(date.today().year)
+    today = date.today()
+    buttons = []
+
+    for i in range(1, 8):
+        d = today + timedelta(days=i)
+        buttons.append([InlineKeyboardButton(
+            text=f"+{i} день" if i == 1 else f"+{i} дней",
+            callback_data=f"quickdate:{d.year}:{d.month}:{d.day}"
+        )])
+
+    buttons.append([InlineKeyboardButton(text="📅 Выбрать другую дату", callback_data="custom_date")])
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
+
     await message.answer(
+        f"📅 **{title}** {emoji}\n\nВыберите дату:",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
+    )
+
+
+@router.callback_query(F.data.startswith("quickdate:"), CountdownStates.date)
+async def process_quickdate(callback: CallbackQuery, state: FSMContext):
+    parts = callback.data.split(":")
+    year = int(parts[1])
+    month = int(parts[2])
+    day = int(parts[3])
+
+    selected_date = date(year, month, day)
+    await state.update_data(date=selected_date)
+    await state.set_state(CountdownStates.repeat)
+
+    data = await state.get_data()
+    title = data.get("title")
+    emoji = data.get("emoji")
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Без повтора", callback_data=f"repeat:{REPEAT_TYPE_NONE}")],
+        [InlineKeyboardButton(text="🔁 Каждый год", callback_data=f"repeat:{REPEAT_TYPE_YEARLY}")],
+    ])
+
+    await callback.message.edit_text(
+        f"📅 **{title}** {emoji}\n"
+        f"Дата: **{selected_date.strftime('%d.%m.%Y')}**\n\n"
+        "Повторение:",
+        reply_markup=keyboard,
+        parse_mode="Markdown"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "custom_date", CountdownStates.date)
+async def custom_date(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(CountdownStates.year)
+
+    year_selector = CalendarService.get_year_selector(date.today().year)
+
+    data = await state.get_data()
+    title = data.get("title")
+    emoji = data.get("emoji")
+
+    await callback.message.edit_text(
         f"📅 **{title}** {emoji}\n\nВыберите год:",
         reply_markup=year_selector,
         parse_mode="Markdown"
     )
+    await callback.answer()
 
 
 @router.callback_query(F.data.startswith("yearchosen:"), CountdownStates.year)
