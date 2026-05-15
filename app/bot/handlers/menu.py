@@ -37,20 +37,35 @@ async def cb_list_countdowns(callback: CallbackQuery, session: AsyncSession, sta
             reply_markup=empty_state()
         )
     else:
-        await state.update_data(current_countdown_idx=0, countdowns=[c.id for c in countdowns])
+        await state.update_data(current_countdown_idx=0, countdown_ids=[c.id for c in countdowns])
         await _show_countdown_card(callback, countdowns[0], countdown_service, 0, len(countdowns))
 
     await callback.answer()
 
 
-@router.callback_query(F.data == "settings")
-async def cb_settings(callback: CallbackQuery):
-    await callback.message.edit_text(
-        "⚙️ Настройки\n\n"
-        "Скоро будут доступны более детальные настройки",
-        reply_markup=__back_menu()
-    )
+@router.callback_query(F.data.startswith("nav_countdown:"))
+async def navigate_countdowns(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
+    direction = callback.data.split(":")[1]
+
+    data = await state.get_data()
+    current_idx = data.get("current_countdown_idx", 0)
+    countdown_ids = data.get("countdown_ids", [])
+
+    if direction == "next":
+        current_idx = (current_idx + 1) % len(countdown_ids)
+    elif direction == "prev":
+        current_idx = (current_idx - 1) % len(countdown_ids)
+
+    await state.update_data(current_countdown_idx=current_idx)
+
+    countdown_repo = CountdownRepository(session)
+    countdown = await countdown_repo.get_by_id(countdown_ids[current_idx])
+    countdown_service = CountdownService(countdown_repo)
+
+    await _show_countdown_card(callback, countdown, countdown_service, current_idx, len(countdown_ids))
     await callback.answer()
+
+
 
 
 def __back_menu():
@@ -65,14 +80,19 @@ def __back_menu():
 async def _show_countdown_card(callback: CallbackQuery, countdown, service, idx: int, total: int):
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     card = service.format_countdown(countdown)
-    nav_text = f"⬅️ {idx+1}/{total} ➡️"
 
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(text=nav_text, callback_data="noop")],
-            [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown.id}")],
-            [InlineKeyboardButton(text="🔙 Назад", callback_data="start")],
-        ]
-    )
+    keyboard_buttons = []
+
+    if total > 1:
+        keyboard_buttons.append([
+            InlineKeyboardButton(text="⬅️", callback_data="nav_countdown:prev"),
+            InlineKeyboardButton(text=f"{idx+1}/{total}", callback_data="noop"),
+            InlineKeyboardButton(text="➡️", callback_data="nav_countdown:next"),
+        ])
+
+    keyboard_buttons.append([InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown.id}")])
+    keyboard_buttons.append([InlineKeyboardButton(text="🔙 Назад", callback_data="start")])
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
     await callback.message.edit_text(card, reply_markup=keyboard)
