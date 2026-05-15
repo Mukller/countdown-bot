@@ -38,7 +38,6 @@ async def main():
     # Register routers
     dp.include_router(handlers.start.router)
     dp.include_router(handlers.menu.router)
-    dp.include_router(handlers.calendar.router)
     dp.include_router(handlers.countdown_creation.router)
     dp.include_router(handlers.countdown_management.router)
     dp.include_router(handlers.settings.router)
