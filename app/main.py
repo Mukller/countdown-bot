@@ -41,6 +41,7 @@ async def main():
     dp.include_router(handlers.countdown_creation.router)
     dp.include_router(handlers.countdown_management.router)
     dp.include_router(handlers.settings.router)
+    dp.include_router(handlers.calendar.router)
 
     # Startup and shutdown
     print("Running startup...", flush=True)
