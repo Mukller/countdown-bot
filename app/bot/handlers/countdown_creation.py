@@ -33,7 +33,7 @@ async def process_title(message: Message, state: FSMContext):
 
     await message.answer(
         f"✨ Название: **{message.text}**\n\n"
-        "Выберите emoji:",
+        "Выберите эмодзи:",
         reply_markup=keyboard,
         parse_mode="Markdown"
     )

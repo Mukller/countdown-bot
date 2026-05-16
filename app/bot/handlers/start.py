@@ -23,8 +23,8 @@ async def cmd_start(message: Message, session: AsyncSession, state: FSMContext):
 
     await state.clear()
     await message.answer(
-        "👋 Добро пожаловать в Countdown Bot!\n\n"
-        "Создавайте таймеры до важных событий и получайте ежедневные напоминания.",
+        "👋 Добро пожаловать в Отсчёт!\n\n"
+        "Создавайте отсчёты до важных событий и получайте ежедневные напоминания.",
         reply_markup=main_menu()
     )
 

@@ -21,12 +21,12 @@ async def cb_create_countdown(callback: CallbackQuery, state: FSMContext):
             [InlineKeyboardButton(text="🎂 День рождения", callback_data="template:birthday:🎂")],
             [InlineKeyboardButton(text="⛱️ Отпуск", callback_data="template:vacation:⛱️")],
             [InlineKeyboardButton(text="📚 Экзамен", callback_data="template:exam:📚")],
-            [InlineKeyboardButton(text="✏️ Свой таймер", callback_data="create_custom")],
+            [InlineKeyboardButton(text="✏️ Свой отсчёт", callback_data="create_custom")],
         ]
     )
 
     await callback.message.edit_text(
-        "🎯 Выберите тип таймера или создайте свой:",
+        "🎯 Выберите тип отсчёта или создайте свой:",
         reply_markup=keyboard
     )
     await callback.answer()
@@ -66,7 +66,7 @@ async def create_from_template(callback: CallbackQuery, state: FSMContext):
 async def create_custom_countdown(callback: CallbackQuery, state: FSMContext):
     await state.set_state(CountdownStates.title)
     await callback.message.edit_text(
-        "📝 Введите название таймера:\n\n"
+        "📝 Введите название отсчёта:\n\n"
         "Например: День рождения, Отпуск, Премьера фильма"
     )
     await callback.answer()
@@ -85,8 +85,8 @@ async def cb_list_countdowns(callback: CallbackQuery, session: AsyncSession, sta
 
     if not countdowns:
         await callback.message.edit_text(
-            "⏳ У вас пока нет таймеров\n\n"
-            "Создайте первый countdown 👇",
+            "⏳ У вас пока нет отсчётов\n\n"
+            "Создайте первый отсчёт 👇",
             reply_markup=empty_state()
         )
     else:
