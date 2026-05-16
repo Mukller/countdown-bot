@@ -40,7 +40,7 @@ async def back_from_calendar(callback: CallbackQuery, state: FSMContext):
     else:
         await state.set_state(CountdownStates.title)
         await callback.message.edit_text(
-            "📝 Введите название таймера:\n\n"
+            "📝 Введите название отсчёта:\n\n"
             "Например: День рождения, Отпуск, Премьера фильма"
         )
 

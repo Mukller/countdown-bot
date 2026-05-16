@@ -59,7 +59,7 @@ async def confirm_delete_countdown(callback: CallbackQuery, session: AsyncSessio
     )
 
     await callback.message.edit_text(
-        f"⚠️ Вы уверены, что хотите удалить этот таймер?\n\n{card}",
+        f"⚠️ Вы уверены, что хотите удалить этот отсчёт?\n\n{card}",
         reply_markup=keyboard
     )
     await callback.answer()
@@ -78,13 +78,13 @@ async def delete_countdown_confirmed(callback: CallbackQuery, session: AsyncSess
 
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="🔙 Назад к таймерам", callback_data="list_countdowns")],
+                [InlineKeyboardButton(text="🔙 Назад к отсчётам", callback_data="list_countdowns")],
             ]
         )
 
         await callback.message.edit_text("✅ Таймер успешно удален", reply_markup=keyboard)
     else:
-        await callback.answer("❌ Не удалось удалить таймер", show_alert=True)
+        await callback.answer("❌ Не удалось удалить отсчёт", show_alert=True)
 
 
 @router.callback_query(F.data.startswith("cancel_delete:"))
