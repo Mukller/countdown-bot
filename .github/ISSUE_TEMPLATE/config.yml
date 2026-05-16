@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📚 Обсуждения
+    url: https://github.com/Mukller/countdown-bot/discussions
+    about: Задавайте вопросы и обсуждайте идеи проекта
+  - name: 📖 Документация
+    url: https://github.com/Mukller/countdown-bot#readme
+    about: Прочитайте документацию проекта
+  - name: 🔒 Уязвимость безопасности
+    url: https://github.com/Mukller/countdown-bot/security/policy
+    about: Сообщите об уязвимости безопасности
