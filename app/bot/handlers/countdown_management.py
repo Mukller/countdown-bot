@@ -26,7 +26,7 @@ async def view_countdown(callback: CallbackQuery, session: AsyncSession):
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown_id}")],
+            [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown_id}", style="danger")],
             [InlineKeyboardButton(text="🔙 Назад", callback_data="list_countdowns")],
         ]
     )
@@ -52,7 +52,7 @@ async def confirm_delete_countdown(callback: CallbackQuery, session: AsyncSessio
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"confirm_delete:{countdown_id}"),
+                InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"confirm_delete:{countdown_id}", style="danger"),
                 InlineKeyboardButton(text="❌ Отмена", callback_data=f"cancel_delete:{countdown_id}"),
             ]
         ]
@@ -78,7 +78,7 @@ async def delete_countdown_confirmed(callback: CallbackQuery, session: AsyncSess
 
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="🔙 Назад к отсчётам", callback_data="list_countdowns")],
+                [InlineKeyboardButton(text="🔙 Назад к отсчётам", callback_data="list_countdowns", style="success")],
             ]
         )
 
@@ -103,7 +103,7 @@ async def cancel_delete_countdown(callback: CallbackQuery, session: AsyncSession
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown_id}")],
+            [InlineKeyboardButton(text="🗑 Удалить", callback_data=f"delete_countdown:{countdown_id}", style="danger")],
             [InlineKeyboardButton(text="🔙 Назад", callback_data="list_countdowns")],
         ]
     )
