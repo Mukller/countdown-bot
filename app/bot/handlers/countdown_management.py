@@ -78,7 +78,7 @@ async def delete_countdown_confirmed(callback: CallbackQuery, session: AsyncSess
 
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
-                [InlineKeyboardButton(text="🔙 Вернуться в меню", callback_data="start")],
+                [InlineKeyboardButton(text="🔙 Назад к таймерам", callback_data="list_countdowns")],
             ]
         )
 
