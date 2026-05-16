@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import UserRepository, CountdownRepository
-from app.services import CountdownService, UserService
+from app.services import CountdownService, UserService, CalendarService
 from app.bot.states import CountdownStates
 from app.core.constants import MAX_TITLE_LENGTH, REPEAT_TYPE_NONE, REPEAT_TYPE_YEARLY
 from app.core.logger import get_logger
@@ -49,51 +49,17 @@ async def process_emoji(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     title = data.get("title")
 
+    keyboard = CalendarService.get_year_selector()
+
     await callback.message.edit_text(
         f"📅 **{title}** {emoji}\n\n"
-        "Введите дату в формате: **ДД.МММ.ГГГГ**\n"
-        "Пример: **16.05.2026**",
+        "Выберите год:",
+        reply_markup=keyboard,
         parse_mode="Markdown"
     )
     await callback.answer()
 
 
-@router.message(CountdownStates.date)
-async def process_date(message: Message, state: FSMContext):
-    if not message.text:
-        await message.answer("❌ Введите дату или выберите быстрый вариант")
-        return
-
-    try:
-        target_date = datetime.strptime(message.text.strip(), "%d.%m.%Y").date()
-    except ValueError:
-        await message.answer("❌ Неверный формат. Используйте: ДД.МММ.ГГГГ\nНапример: 16.05.2026")
-        return
-
-    today = date.today()
-    if target_date <= today:
-        await message.answer("❌ Дата должна быть в будущем")
-        return
-
-    await state.update_data(date=target_date)
-    await state.set_state(CountdownStates.repeat)
-
-    data = await state.get_data()
-    title = data.get("title")
-    emoji = data.get("emoji")
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Без повтора", callback_data=f"repeat:{REPEAT_TYPE_NONE}")],
-        [InlineKeyboardButton(text="🔁 Каждый год", callback_data=f"repeat:{REPEAT_TYPE_YEARLY}")],
-    ])
-
-    await message.answer(
-        f"📅 **{title}** {emoji}\n"
-        f"Дата: **{target_date.strftime('%d.%m.%Y')}**\n\n"
-        "Повторение:",
-        reply_markup=keyboard,
-        parse_mode="Markdown"
-    )
 
 
 @router.callback_query(F.data.startswith("repeat:"), CountdownStates.repeat)

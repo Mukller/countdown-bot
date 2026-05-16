@@ -16,11 +16,34 @@ logger = get_logger(__name__)
 
 @router.callback_query(F.data == "calback")
 async def back_from_calendar(callback: CallbackQuery, state: FSMContext):
-    await state.set_state(CountdownStates.title)
-    await callback.message.edit_text(
-        "📝 Введите название таймера:\n\n"
-        "Например: День рождения, Отпуск, Премьера фильма"
-    )
+    current_state = await state.get_state()
+
+    if current_state == CountdownStates.date:
+        await state.set_state(CountdownStates.emoji)
+        data = await state.get_data()
+        title = data.get("title")
+
+        emojis = ["🎂", "🎉", "🎄", "🎁", "⛱️", "🏖️", "📅", "✈️", "🚗", "💒", "👶", "🐶", "📚", "🎮", "🎬", "🎵", "💍", "🏆"]
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text=emoji, callback_data=f"emoji:{emoji}") for emoji in emojis[i:i+4]]
+                for i in range(0, len(emojis), 4)
+            ]
+        )
+
+        await callback.message.edit_text(
+            f"✨ Название: **{title}**\n\n"
+            "Выберите emoji:",
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
+    else:
+        await state.set_state(CountdownStates.title)
+        await callback.message.edit_text(
+            "📝 Введите название таймера:\n\n"
+            "Например: День рождения, Отпуск, Премьера фильма"
+        )
+
     await callback.answer()
 
 
