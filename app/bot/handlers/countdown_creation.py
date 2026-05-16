@@ -22,20 +22,26 @@ async def process_title(message: Message, state: FSMContext):
 
     await state.update_data(title=message.text)
     await state.set_state(CountdownStates.emoji)
+
+    emojis = ["🎂", "🎉", "🎄", "🎁", "⛱️", "🏖️", "📅", "✈️", "🚗", "💒", "👶", "🐶", "📚", "🎮", "🎬", "🎵", "💍", "🏆"]
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text=emoji, callback_data=f"emoji:{emoji}") for emoji in emojis[i:i+4]]
+            for i in range(0, len(emojis), 4)
+        ]
+    )
+
     await message.answer(
         f"✨ Название: **{message.text}**\n\n"
-        "Выберите emoji:\n\n"
-        "🎂 🎉 🎄 🎁 ⛱️ 🏖️ 📅 ✈️ 🚗 💒 👶 🐶 📚 🎮 🎬 🎵 💍 🏆",
+        "Выберите emoji:",
+        reply_markup=keyboard,
         parse_mode="Markdown"
     )
 
 
-@router.message(CountdownStates.emoji)
-async def process_emoji(message: Message, state: FSMContext):
-    emoji = message.text
-    if not emoji or len(emoji) > 2:
-        await message.answer("❌ Введите одиночный emoji")
-        return
+@router.callback_query(F.data.startswith("emoji:"), CountdownStates.emoji)
+async def process_emoji(callback: CallbackQuery, state: FSMContext):
+    emoji = callback.data.split(":")[1]
 
     await state.update_data(emoji=emoji)
     await state.set_state(CountdownStates.date)
@@ -43,12 +49,13 @@ async def process_emoji(message: Message, state: FSMContext):
     data = await state.get_data()
     title = data.get("title")
 
-    await message.answer(
+    await callback.message.edit_text(
         f"📅 **{title}** {emoji}\n\n"
         "Введите дату в формате: **ДД.МММ.ГГГГ**\n"
         "Пример: **16.05.2026**",
         parse_mode="Markdown"
     )
+    await callback.answer()
 
 
 @router.message(CountdownStates.date)
