@@ -48,7 +48,7 @@ async def main():
     await on_startup(bot)
 
     # Setup scheduler
-    scheduler = setup_scheduler(bot)
+    scheduler = await setup_scheduler(bot)
     scheduler.start()
     logger.info("scheduler_started")
 

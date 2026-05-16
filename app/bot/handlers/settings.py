@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.repositories import UserRepository
 from app.bot.states import SettingsStates
 from app.core.logger import get_logger
+from app.scheduler.jobs import update_user_notification_job
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 router = Router()
@@ -72,6 +73,8 @@ async def set_notification_time(callback: CallbackQuery, session: AsyncSession):
         user.notification_time = notification_time
         await session.commit()
 
+        await update_user_notification_job(user.id, notification_time)
+
         logger.info(
             "notification_time_changed",
             user_id=user.id,
@@ -125,6 +128,8 @@ async def process_custom_time(message: Message, state: FSMContext, session: Asyn
         if user:
             user.notification_time = notification_time
             await session.commit()
+
+            await update_user_notification_job(user.id, notification_time)
 
             logger.info(
                 "notification_time_changed",

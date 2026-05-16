@@ -13,52 +13,52 @@ class NotificationService:
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    async def send_daily_digest(self):
-        """Send daily digest to all users whose notification time matches current time"""
+    async def send_digest_for_user(self, user_id: int):
+        """Send daily digest to a specific user"""
         async with async_session() as session:
-            current_time = datetime.now().time()
             current_date = date.today()
 
-            # Get all users with notification_time matching current minute (with 1-minute tolerance)
-            users = await session.execute(
-                select(User).filter(
-                    User.notification_time <= current_time
-                )
+            # Get the specific user
+            user = await session.execute(
+                select(User).where(User.id == user_id)
             )
-            users_list = users.scalars().all()
+            user = user.scalar_one_or_none()
 
-            for user in users_list:
-                try:
-                    # Get user's countdowns
-                    countdowns = await session.execute(
-                        select(Countdown).where(Countdown.user_id == user.id)
-                    )
-                    countdowns_list = countdowns.scalars().all()
+            if not user:
+                logger.warning("user_not_found_for_digest", user_id=user_id)
+                return
 
-                    if not countdowns_list:
-                        continue
+            try:
+                # Get user's countdowns
+                countdowns = await session.execute(
+                    select(Countdown).where(Countdown.user_id == user.id)
+                )
+                countdowns_list = countdowns.scalars().all()
 
-                    message = self._build_digest(countdowns_list, current_date)
+                if not countdowns_list:
+                    return
 
-                    await self.bot.send_message(
-                        chat_id=user.telegram_id,
-                        text=message,
-                        parse_mode="Markdown"
-                    )
+                message = self._build_digest(countdowns_list, current_date)
 
-                    logger.info(
-                        "notification_sent",
-                        telegram_id=user.telegram_id,
-                        user_id=user.id,
-                        countdown_count=len(countdowns_list)
-                    )
+                await self.bot.send_message(
+                    chat_id=user.telegram_id,
+                    text=message,
+                    parse_mode="Markdown"
+                )
 
-                except Exception as e:
-                    logger.error(
-                        "notification_send_failed",
-                        telegram_id=user.telegram_id,
-                        error=str(e)
-                    )
+                logger.info(
+                    "notification_sent",
+                    telegram_id=user.telegram_id,
+                    user_id=user.id,
+                    countdown_count=len(countdowns_list)
+                )
+
+            except Exception as e:
+                logger.error(
+                    "notification_send_failed",
+                    telegram_id=user.telegram_id,
+                    error=str(e)
+                )
 
     def _build_digest(self, countdowns: list, today: date) -> str:
         """Build notification digest message"""
