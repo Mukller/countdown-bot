@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue) ![Aiogram](https://img.shields.io/badge/Aiogram-3.0+-green) ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-red) ![License](https://img.shields.io/badge/License-MIT-purple)
 
-[English](#english) • [Русский](#русский)
+[English](README_EN.md) • Русский
 
 ---
 
