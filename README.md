@@ -1,5 +1,22 @@
 # Отсчёт
+<div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE.md)
+[![maintained](https://img.shields.io/badge/maintained%3F-yes-green?style=flat-square)](https://github.com/Mukller/countdown-bot)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
+
+**[English](README_EN.md) • Русский**
+
+</div>
+<div align="center">
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-purple?style=flat-square)](LICENSE.md)
+[![maintained](https://img.shields.io/badge/maintained%3F-yes-green?style=flat-square)](https://github.com/Mukller/countdown-bot)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
+
+**[English](README_EN.md) • Русский**
+
+</div>
 ⏳ **Telegram-бот для создания отсчётов до важных событий с ежедневными напоминаниями**
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue) ![Aiogram](https://img.shields.io/badge/Aiogram-3.0+-green) ![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-red) ![License](https://img.shields.io/badge/License-MIT-purple)
