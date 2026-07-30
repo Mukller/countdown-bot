@@ -19,3 +19,7 @@ async_session = sessionmaker(
 async def get_session():
     async with async_session() as session:
         yield session
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:21:36 +0300

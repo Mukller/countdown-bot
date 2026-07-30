@@ -24,3 +24,7 @@ print(test_date_input("01.01.2020"))
 
 print("\nTest 4 - Today:")
 print(test_date_input("16.05.2026"))
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 01:38:14 +0300

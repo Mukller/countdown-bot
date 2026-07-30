@@ -24,3 +24,7 @@ class UserRepository:
         if user is None:
             user = await self.create(telegram_id)
         return user
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:21:36 +0300

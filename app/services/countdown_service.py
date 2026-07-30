@@ -57,3 +57,7 @@ class CountdownService:
             card += f"🔁 {repeat_text}\n"
 
         return card
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:21:36 +0300

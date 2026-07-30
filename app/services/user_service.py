@@ -11,3 +11,7 @@ class UserService:
 
     async def get_user(self, telegram_id: int) -> User | None:
         return await self.user_repo.get_by_telegram_id(telegram_id)
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:21:36 +0300

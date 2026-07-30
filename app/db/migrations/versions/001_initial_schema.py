@@ -52,3 +52,7 @@ def downgrade() -> None:
     op.drop_table('countdowns')
     op.drop_index('idx_users_notification_time')
     op.drop_table('users')
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:24:49 +0300

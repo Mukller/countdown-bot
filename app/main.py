@@ -62,3 +62,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:22:49 +0300

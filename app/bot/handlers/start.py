@@ -36,3 +36,7 @@ async def cb_start(callback: CallbackQuery):
         reply_markup=main_menu()
     )
     await callback.answer()
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:38:06 +0300

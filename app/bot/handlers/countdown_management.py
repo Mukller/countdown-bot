@@ -110,3 +110,7 @@ async def cancel_delete_countdown(callback: CallbackQuery, session: AsyncSession
 
     await callback.message.edit_text(card, reply_markup=keyboard)
     await callback.answer()
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:38:06 +0300

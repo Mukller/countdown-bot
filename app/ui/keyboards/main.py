@@ -17,3 +17,7 @@ def empty_state():
             [InlineKeyboardButton(text="➕ Создать отсчёт", callback_data="create_countdown")],
         ]
     )
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:38:06 +0300

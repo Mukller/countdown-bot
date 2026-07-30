@@ -24,3 +24,7 @@ async def run_migrations():
     except Exception as e:
         logger.error("migrations_failed", error=str(e))
         raise
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:24:49 +0300

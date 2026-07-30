@@ -3,3 +3,7 @@ from app.core.logger import configure_logging, get_logger
 from app.core.constants import *
 
 __all__ = ["settings", "configure_logging", "get_logger"]
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:21:36 +0300

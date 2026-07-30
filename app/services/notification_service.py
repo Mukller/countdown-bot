@@ -118,3 +118,7 @@ class NotificationService:
         digest += "_Бот Countdown_"
 
         return digest
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:22:49 +0300

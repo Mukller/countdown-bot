@@ -86,3 +86,7 @@ async def update_user_notification_job(user_id: int, notification_time) -> None:
             user_id=user_id,
             notification_time=str(notification_time)
         )
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:22:49 +0300

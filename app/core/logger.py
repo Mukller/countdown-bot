@@ -23,3 +23,7 @@ def configure_logging():
 
 def get_logger(name: str):
     return structlog.get_logger(name)
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-15 22:21:36 +0300

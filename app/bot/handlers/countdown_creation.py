@@ -105,3 +105,7 @@ async def process_repeat(callback: CallbackQuery, state: FSMContext, session: As
 @router.callback_query(F.data == "noop")
 async def noop_callback(callback: CallbackQuery):
     await callback.answer()
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:38:06 +0300

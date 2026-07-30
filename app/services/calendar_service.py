@@ -140,3 +140,7 @@ class CalendarService:
             keyboard.append(week)
 
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 01:00:49 +0300

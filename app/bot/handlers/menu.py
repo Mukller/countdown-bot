@@ -149,3 +149,7 @@ async def _show_countdown_card(callback: CallbackQuery, countdown, service, idx:
     keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
     await callback.message.edit_text(card, reply_markup=keyboard)
+
+# Author: Anton Petnitsky
+# GitHub: https://github.com/Mukller/countdown-bot
+# Last modified: 2026-05-16 05:38:06 +0300
