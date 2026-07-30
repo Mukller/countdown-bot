@@ -36,3 +36,6 @@ venv.bak/
 *~
 .DS_Store
 node_modules/
+
+# Local runtime artifacts (not for git)
+bot.log
