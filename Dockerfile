@@ -7,6 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN useradd -m -u 1000 appuser 2>/dev/null || true
+RUN chown -R appuser:appuser /app 2>/dev/null || true
+USER appuser
 CMD ["python", "-u", "-m", "app.main"]
 
 # Author: Anton Petnitsky
